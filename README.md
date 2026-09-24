@@ -6,23 +6,6 @@ falcon is built on the [Cheshire](https://github.com/pulp-platform/cheshire) pla
 
 A similar but smaller 32-bit version of this flow, without NVDLA, is in [riscv-linux-from-scratch](https://github.com/celuk/riscv-linux-from-scratch).
 
-## Citation
-
-You can cite the paper (accepted but not published yet) as:
-
-```bibtex
-@inproceedings{celik2026falcon,
-  title={FALCON: A Linux-Capable RISC-V SoC with NVDLA for Edge AI Inference},
-  author={Celik, Seyyid Hikmet and Bolat, Alperen and Grosse Hokamp, Peer and Hui, Henry and Sezer, Sakir and Ergin, Oguz},
-  booktitle={2026 IEEE 39th International System-on-Chip Conference (SOCC)},
-  year={2026},
-  organization={IEEE},
-  note={to be published}
-}
-```
-
-![soc_arch.png](https://github.com/celuk/falcon/blob/main/figures/soc_arch.png?raw=true)
-
 ## Requirements
 
 The 64-bit riscv linux toolchain is built from the [riscv-gnu-toolchain](https://github.com/riscv-collab/riscv-gnu-toolchain) copy in [`riscv-toolchain-custom`](riscv-toolchain-custom) (`riscv64-unknown-linux-gnu-`, rv64gc / lp64d, glibc) and installed into `riscv-toolchain-custom/_install`. Every other build script points to that path relatively, so the toolchain has to be built first. Its host prerequisites are listed in the [riscv-gnu-toolchain README](riscv-toolchain-custom/riscv-gnu-toolchain/README.md).
