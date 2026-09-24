@@ -1,8 +1,8 @@
 # falcon-linux
 
-The software stack of [falcon](https://github.com/celuk/falcon), a Linux capable RISC-V SoC with NVDLA for edge AI inference. It contains [OpenSBI](https://github.com/riscv-software-src/opensbi) as first stage bootloader, a 64-bit [linux kernel](https://github.com/torvalds/linux) configured for the SoC, a [BusyBox](https://github.com/mirror/busybox) based initramfs embedded into the kernel image and the [NVDLA software stack](https://github.com/nvdla/sw) (KMD and UMD) ported to RISC-V and Linux 6.15. Everything is compiled as bare images (no U-Boot, no disk, no root filesystem on external media (e.g. SD Card)) and loaded straight into DRAM over UART (or JTAG), so the CVA6 soft-core on the FPGA boots Linux and drives the NVDLA by itself without any hard ARM processing system.
+The software stack of [falcon](https://github.com/gdrlab/falcon), a Linux capable RISC-V SoC with NVDLA for edge AI inference. It contains [OpenSBI](https://github.com/riscv-software-src/opensbi) as first stage bootloader, a 64-bit [linux kernel](https://github.com/torvalds/linux) configured for the SoC, a [BusyBox](https://github.com/mirror/busybox) based initramfs embedded into the kernel image and the [NVDLA software stack](https://github.com/nvdla/sw) (KMD and UMD) ported to RISC-V and Linux 6.15. Everything is compiled as bare images (no U-Boot, no disk, no root filesystem on external media (e.g. SD Card)) and loaded straight into DRAM over UART (or JTAG), so the CVA6 soft-core on the FPGA boots Linux and drives the NVDLA by itself without any hard ARM processing system.
 
-falcon is built on the [Cheshire](https://github.com/pulp-platform/cheshire) platform around a 64-bit CVA6 core (RV64IMAFDC, SV39 MMU) with the `nv_small` configuration of NVDLA and runs on a Xilinx VCU108 board. The hardware, the bitstream flow and the programming scripts are in the main repo: https://github.com/celuk/falcon
+falcon is built on the [Cheshire](https://github.com/pulp-platform/cheshire) platform around a 64-bit CVA6 core (RV64IMAFDC, SV39 MMU) with the `nv_small` configuration of NVDLA and runs on a Xilinx VCU108 board. The hardware, the bitstream flow and the programming scripts are in the main repo: https://github.com/gdrlab/falcon
 
 A similar but smaller 32-bit version of this flow, without NVDLA, is in [riscv-linux-from-scratch](https://github.com/celuk/riscv-linux-from-scratch).
 
@@ -18,7 +18,7 @@ sudo apt install python3 python3-pip
 pip3 install pyserial
 ```
 
-and the scripts in [falcon/cheshire-env-nvdla/tools](https://github.com/celuk/falcon/tree/main/cheshire-env-nvdla/tools) ([`bin2hex.py`](https://github.com/celuk/falcon/tree/main/cheshire-env-nvdla/tools/bin2hex.py), [`uart_send_data_to_dram.py`](https://github.com/celuk/falcon/tree/main/cheshire-env-nvdla/tools/uart_send_data_to_dram.py), [`vmem_to_ddr3_init.py`](https://github.com/celuk/falcon/tree/main/cheshire-env-nvdla/tools/vmem_to_ddr3_init.py)).
+and the scripts in [falcon/cheshire-env-nvdla/tools](https://github.com/gdrlab/falcon/tree/main/cheshire-env-nvdla/tools) ([`bin2hex.py`](https://github.com/gdrlab/falcon/tree/main/cheshire-env-nvdla/tools/bin2hex.py), [`uart_send_data_to_dram.py`](https://github.com/gdrlab/falcon/tree/main/cheshire-env-nvdla/tools/uart_send_data_to_dram.py), [`vmem_to_ddr3_init.py`](https://github.com/gdrlab/falcon/tree/main/cheshire-env-nvdla/tools/vmem_to_ddr3_init.py)).
 
 **Note:** Clone the repo on a case-sensitive filesystem (e.g. ext4, not `/mnt/c` on WSL or NTFS). The kernel and the toolchain linux headers have netfilter headers that only differ in case (e.g. `xt_DSCP.h` and `xt_dscp.h`), which overwrite each other otherwise.
 
@@ -39,7 +39,7 @@ and the scripts in [falcon/cheshire-env-nvdla/tools](https://github.com/celuk/fa
 ## Compilation
 
 ```bash
-git clone https://github.com/celuk/falcon-linux
+git clone https://github.com/gdrlab/falcon-linux
 ```
 
 ```bash
@@ -97,7 +97,7 @@ riscv-linux-port/arch/riscv/boot/Image.hex
 riscv-opensbi-port/build/platform/template/firmware/fw_dynamic.hex
 ```
 
---> You can program these hex codes separately to their DRAM addresses as it is done in the [falcon Makefile](https://github.com/celuk/falcon/blob/main/Makefile) `program_linux` make command (program bitstream, send dtb, kernel and OpenSBI over UART at 921600 baud) to run linux on the pure soft-core SoC running on the FPGA:
+--> You can program these hex codes separately to their DRAM addresses as it is done in the [falcon Makefile](https://github.com/gdrlab/falcon/blob/main/Makefile) `program_linux` make command (program bitstream, send dtb, kernel and OpenSBI over UART at 921600 baud) to run linux on the pure soft-core SoC running on the FPGA:
 
 ```bash
 make program_linux <ttyUSB number>
@@ -109,7 +109,7 @@ Then open the console (115200 baud):
 make pico <ttyUSB number>
 ```
 
-Over JTAG, the same can be done with OpenOCD + GDB using [`load_fw.gdb`](https://github.com/celuk/falcon/blob/main/util/load_fw.gdb), which restores `custom.dtb` and `Image` as binaries and loads `fw_dynamic.elf`.
+Over JTAG, the same can be done with OpenOCD + GDB using [`load_fw.gdb`](https://github.com/gdrlab/falcon/blob/main/util/load_fw.gdb), which restores `custom.dtb` and `Image` as binaries and loads `fw_dynamic.elf`.
 
 ## Running Models on NVDLA
 
@@ -172,7 +172,7 @@ The DRAM base of the SoC is `0x80000000` (2 GB DDR4) and the three images are pl
 | Device tree `custom.dtb` | `0x00140000` | `0x80140000` |
 | Linux `Image` (kernel + initramfs + loadables) | `0x00200000` | `0x80200000` |
 
-The device tree region is kept out of the linux memory with `/memreserve/ 0x80140000 0x00010000` in [`custom.dts`](riscv-opensbi-port/platform/template/custom.dts). These offsets are the ones in the modified [`cheshire_bootrom.c`](https://github.com/celuk/falcon/blob/main/cheshire-env-nvdla/cheshire/hw/bootrom/cheshire_bootrom.c), in the `program_linux` command of the [falcon `Makefile`](https://github.com/celuk/falcon/blob/main/Makefile) and in [`load_fw.gdb`](https://github.com/celuk/falcon/blob/main/util/load_fw.gdb). If you change one, change the others as well.
+The device tree region is kept out of the linux memory with `/memreserve/ 0x80140000 0x00010000` in [`custom.dts`](riscv-opensbi-port/platform/template/custom.dts). These offsets are the ones in the modified [`cheshire_bootrom.c`](https://github.com/gdrlab/falcon/blob/main/cheshire-env-nvdla/cheshire/hw/bootrom/cheshire_bootrom.c), in the `program_linux` command of the [falcon `Makefile`](https://github.com/gdrlab/falcon/blob/main/Makefile) and in [`load_fw.gdb`](https://github.com/gdrlab/falcon/blob/main/util/load_fw.gdb). If you change one, change the others as well.
 
 ## FW_DYNAMIC bootloader
 
@@ -180,7 +180,7 @@ OpenSBI can be built three ways. `FW_JUMP` has the next stage address compiled i
 
 The price is that `FW_DYNAMIC` will not boot on its own. The previous stage has to fill a `fw_dynamic_info` struct and enter OpenSBI with `a0 = hartid`, `a1 = dtb address` and `a2 = pointer to that struct`. A bootloader that does not do this will hand OpenSBI garbage in `a2` and the boot dies before any console output.
 
-The original Cheshire bootrom only jumps to an entry point, so the falcon bootrom is modified to do this in [`cheshire_bootrom.c`](https://github.com/celuk/falcon/blob/main/cheshire-env-nvdla/cheshire/hw/bootrom/cheshire_bootrom.c):
+The original Cheshire bootrom only jumps to an entry point, so the falcon bootrom is modified to do this in [`cheshire_bootrom.c`](https://github.com/gdrlab/falcon/blob/main/cheshire-env-nvdla/cheshire/hw/bootrom/cheshire_bootrom.c):
 
 ```c
 struct fw_dynamic_info {

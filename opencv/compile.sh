@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This file is part of https://github.com/celuk/falcon-linux
+# This file is part of https://github.com/gdrlab/falcon-linux
 # Copyright (C) 2026  Seyyid Hikmet Celik
 #                     seyyid4091@gmail.com
 #
