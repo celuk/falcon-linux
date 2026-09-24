@@ -43,15 +43,15 @@ and the scripts in [falcon/cheshire-env-nvdla/tools](https://github.com/celuk/fa
 
 | Directory | Version | Description |
 | --- | --- | --- |
-| [riscv-toolchain-custom](riscv-toolchain-custom) | riscv-gnu-toolchain | `riscv64-unknown-linux-gnu-` cross compiler used for everything below |
-| [riscv-opensbi-port](riscv-opensbi-port) | OpenSBI v1.7 | [`platform/template`](riscv-opensbi-port/platform/template) port for the SoC (8250 UART at `0x3002000` for the SBI console), [`custom.dts`](riscv-opensbi-port/platform/template/custom.dts) device tree with the NVDLA node |
-| [riscv-linux-port](riscv-linux-port) | Linux v6.15 | RV64 config [`arch/riscv/configs/64-bit.config`](riscv-linux-port/arch/riscv/configs/64-bit.config) for the SoC, with DRM/GEM DMA helpers and 64 MB CMA for the NVDLA buffers |
-| [riscv-busybox-port](riscv-busybox-port) | BusyBox 1.36.1 | static build and the init script in [`compile.sh`](riscv-busybox-port/compile.sh) that builds the initramfs with the NVDLA driver, runtime, loadables and test images |
-| [nvdla/sw](nvdla/sw) | NVDLA sw | KMD [`opendla.ko`](nvdla/sw/kmd/port/linux) ported to Linux 6.15 and UMD `nvdla_runtime` / `nvdla_compiler` cross-compiled for RISC-V (`DLA_2_CONFIG`, i.e. `nv_small`) |
-| [nvdla/loadables](nvdla/loadables) | - | precompiled `.nvdla` loadables and test images for LeNet-5 (MNIST), ResNet-18 (CIFAR-10) and ResNet-18 (ImageNet-2012) |
-| [lrzsz](lrzsz) | lrzsz 0.13.0-alpha | static `rz` / `sz` to transfer files over the UART console with ZMODEM |
-| [opencv](opencv) | OpenCV 4.2 | static cross build of `core`, `imgproc`, `imgcodecs` and `highgui`, needed by Tengine |
-| [tengine](tengine) | Tengine | inference engine with the OpenDLA backend (`tm_classification_opendla`, `tm_yolox_opendla`, `tm_yolov3_tiny_opendla`), experimental and not included in the initramfs by default |
+| [riscv-toolchain-custom](riscv-toolchain-custom) | 2021.01.26 | custom `riscv64-unknown-linux-gnu-` cross compiler used for everything below |
+| [riscv-opensbi-port](riscv-opensbi-port) | v1.7 | [`platform/template`](riscv-opensbi-port/platform/template) port for the SoC (8250 UART at `0x3002000` for the SBI console), [`custom.dts`](riscv-opensbi-port/platform/template/custom.dts) device tree with the NVDLA node |
+| [riscv-linux-port](riscv-linux-port) | v6.15 | RV64 config [`arch/riscv/configs/64-bit.config`](riscv-linux-port/arch/riscv/configs/64-bit.config) for the SoC, with DRM/GEM DMA helpers and 64 MB CMA for the NVDLA buffers |
+| [riscv-busybox-port](riscv-busybox-port) | 1.36.1 | static build and the init script in [`compile.sh`](riscv-busybox-port/compile.sh) that builds the initramfs with the NVDLA driver, runtime, loadables and test images |
+| [nvdla/sw](nvdla/sw) | latest | KMD [`opendla.ko`](nvdla/sw/kmd/port/linux) ported to Linux 6.15 and UMD `nvdla_runtime` / `nvdla_compiler` cross-compiled for RISC-V (`DLA_2_CONFIG`, i.e. `nv_small`) |
+| [nvdla/loadables](nvdla/loadables) | latest | precompiled `.nvdla` loadables and test images for LeNet-5 (MNIST), ResNet-18 (CIFAR-10) and ResNet-18 (ImageNet-2012) |
+| [lrzsz](lrzsz) | 0.13.0-alpha | static `rz` / `sz` to transfer files over the UART console with ZMODEM |
+| [opencv](opencv) | 4.2 | static cross build of `core`, `imgproc`, `imgcodecs` and `highgui`, needed by Tengine |
+| [tengine](tengine) | lite v1.5 | inference engine with the OpenDLA backend (`tm_classification_opendla`, `tm_yolox_opendla`, `tm_yolov3_tiny_opendla`), experimental and not included in the initramfs by default |
 
 ## Compilation
 
@@ -145,7 +145,33 @@ Starting shell...
 | ResNet-18 | CIFAR-10 | [`cifar-default.nvdla`](nvdla/loadables/resnet18-cifar10) | 32x32 | `cat_32.jpg` |
 | ResNet-18 | ImageNet-2012 | [`imagenet-default.nvdla`](nvdla/loadables/resnet18-imagenet2012) | 224x224 | `331_hare.jpg` |
 
-More test images are in the `images` directories of [`nvdla/loadables`](nvdla/loadables). To try another image or loadable without rebuilding the kernel, send it over the console from picocom using [`lrzsz`](https://github.com/UweOhse/lrzsz) tools built, or add it to the `cp` lines in [`riscv-busybox-port/compile.sh`](riscv-busybox-port/compile.sh) and rebuild BusyBox and Linux.
+More test images are in the `images` directories of [`nvdla/loadables`](nvdla/loadables). To try another image or loadable without rebuilding the kernel, send it over the console from picocom using [`lrzsz`](https://github.com/UweOhse/lrzsz) tools built:
+
+```bash
+# install lrzsz on your host too if not installed (it is installed already in the target)
+sudo apt install lrzsz
+```
+
+```bash
+# sending file from host (your PC) to target (softcore on FPGA) over UART
+## while you are in linux bash shell over UART in picocom terminal press CTRL+A CTRL+S
+## give the path of the file in the host and press enter to send
+## the target will automatically receive the file by running sz on the host and rz on the target
+## if the file is binary you may use uuencode in your host to convert encoded txt file and can decode with uudecode on the target to get original file
+```
+
+```bash
+# sending file from target (softcore on FPGA) to host (your PC) over UART
+## while you are in linux bash shell over UART in picocom terminal, type the path of the file in the host with sz command
+sz <file-to-send> ## keep one empty space character after this command
+## press enter to send (in some terminals even you shouldn't press, you can try both and see which one is working)
+## press CTRL+A CTRL+R
+## it will ask for file but do not type anything just press enter
+## the host will automatically receive the file by running rz on the host
+## if the file is binary you may use uuencode in your target to convert encoded txt file and can decode with uudecode on the host to get original file
+```
+
+or add it to the `cp` lines in [`riscv-busybox-port/compile.sh`](riscv-busybox-port/compile.sh) and rebuild BusyBox and Linux.
 
 ImageNet ResNet-18 needs large contiguous DMA buffers, which is why the kernel is built with 64 MB CMA (`CONFIG_CMA_SIZE_MBYTES=64`, and `cma=64M` in the device tree bootargs). With a smaller CMA pool it crashes while allocating the buffers.
 
@@ -198,7 +224,6 @@ __asm__ volatile (
     "mv a0, %[hart_id]\n"
     "mv a1, %[dtb_addr]\n" // 0x80000000 + 0x00140000
     "mv a2, %[info_addr]\n" // &dynamic_info
-    ...
 );
 // then jump to 0x80000000 (OpenSBI)
 ```
