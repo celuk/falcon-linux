@@ -97,7 +97,7 @@ riscv-linux-port/arch/riscv/boot/Image.hex
 riscv-opensbi-port/build/platform/template/firmware/fw_dynamic.hex
 ```
 
---> You can program these hex codes separately to their DRAM addresses (see [Boot Process](#boot-process)) as it is done in the [falcon `Makefile`](https://github.com/celuk/falcon/blob/main/Makefile) `program_linux` make command (program bitstream, send dtb, kernel and OpenSBI over UART at 921600 baud) to run linux on the pure soft-core SoC running on the FPGA:
+--> You can program these hex codes separately to their DRAM addresses as it is done in the [falcon Makefile](https://github.com/celuk/falcon/blob/main/Makefile) `program_linux` make command (program bitstream, send dtb, kernel and OpenSBI over UART at 921600 baud) to run linux on the pure soft-core SoC running on the FPGA:
 
 ```bash
 make program_linux <ttyUSB number>
